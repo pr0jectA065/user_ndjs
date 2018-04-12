@@ -1,4 +1,4 @@
-var Biz=require('../../models/biz.model.js');
+var Biz=require('../../models/biz.model');
 
 //Create and Save a biz profile
 exports.create=function(req,res){

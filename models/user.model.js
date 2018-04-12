@@ -4,7 +4,7 @@ var model=mongoose.Schema;
 var auditModel=require('./audit.model')
 
 var userModel=new model({
-    //_id will be self generated in mongo collection
+    //_id (uuid) will be self generated in mongo collection
     name:{type:String,required:true},
     phone:{type:String,required:true},
     email:String,
