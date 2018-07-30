@@ -1,7 +1,7 @@
 var Biz=require('../../models/biz.model');
 
 //Create and Save a biz profile
-exports.create=function(req,res){
+exports.post=function(req,res){
 
     if (!req.body.company){
         return res.status(400).send({message:"Business name cannot be empty"});
@@ -20,12 +20,13 @@ exports.create=function(req,res){
         status:req.body.status,
         audit:req.body.audit
     });
-
+    //insert the record
     biz_instance.save(function(err,data){
         if (err){
             console.log(err);
             res.status(500).send({message:"Error while creating business profile"});
         }else{
+            console.log("Record persisted..")
             res.send(data);
         }
     })

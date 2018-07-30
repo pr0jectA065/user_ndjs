@@ -42,6 +42,7 @@ exports.findAll=function(req,res){
 
 //Retrieve single user profile with user Id
 exports.findOne=function(req,res){
+
     User.findById(req.params.userId,function(err,user){
         if (err){
             console.log(err);
