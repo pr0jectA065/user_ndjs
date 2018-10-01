@@ -15,6 +15,9 @@ exports.register=function(req,res){
     if (!req.body.lastname){
         return res.status(400).send({message:"User last name required for registration.."});
     }
+    if (!req.body.email){
+        return res.status(400).send({message:"Email required for registration.."});
+    }
     if (!req.body.pw){
         return res.status(400).send({message:"Password required for registration.."});
     }
@@ -24,7 +27,7 @@ exports.register=function(req,res){
     var reg_instance=new User({
         firstname:req.body.firstname,
         lastname:req.body.lastname,
-        email:req.body.email,
+        isVerified:req.body.isVerified,
         pw:hashPw
     });
 

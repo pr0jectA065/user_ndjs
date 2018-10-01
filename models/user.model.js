@@ -14,6 +14,7 @@ var userModel=new model({
     //userId and email are required 
     userId:String,
     email:String,
+    isVerified:{type:Boolean,default:false},
     firstname:String,
     lastname:String,
     phone:String,

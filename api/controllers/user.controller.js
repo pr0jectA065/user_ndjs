@@ -1,32 +1,5 @@
 var User=require('../../models/user.model');
 
-//Create and Save a user profile
-exports.create=function(req,res){
-
-    if (!req.body.name){
-        return res.status(400).send({message:"User name cannot be empty"});
-    }
-
-    //Create an instance of user model
-    var user_instance=new User({
-        name:req.body.name,
-        phone:req.body.phone,
-        email:req.body.email,
-        social:req.body.social,
-        status:req.body.status,
-        audit:req.body.audit
-    });
-
-    user_instance.save(function(err,data){
-        if (err){
-            console.log(err);
-            res.status(500).send({message:"Error while creating user profile"});
-        }else{
-            res.send(data);
-        }
-    })
-};
-
 //retrieve and return all user profiles from mongodb
 exports.findAll=function(req,res){
     
