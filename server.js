@@ -13,6 +13,9 @@ app.use(bodyParser.urlencoded({"extended":true}));
 //parse requests of content-type - application/json
 app.use(bodyParser.json());
 
+//We're using the Jade templating language because it's fast and neat
+//app.set('view engine','jade')
+
 //mongoose setup to connect to mongodb
 mongoose.Promise=global.Promise;
 if (app.settings.env==="development"){

@@ -19,8 +19,12 @@
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.2",
     "express": "^4.16.3",
+    "jade": "^1.11.0",
     "jsonwebtoken": "^8.2.1",
+    "mailgun-js": "^0.21.0",
     "mongoose": "^5.0.12",
+    "nodemailer": "^4.6.8",
+    "nodemailer-smtp-transport": "^2.7.4",
     "npm": "^5.8.0"
   }
 }

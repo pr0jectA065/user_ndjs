@@ -5,11 +5,12 @@ module.exports=function(app){
     var users=require('../controllers/auth.controller.js');
 
     //Register/signup a new user account
+    //Registration with 2 elements - emailId, password
     //Generater JWT on successful registration
     app.post('/auth/register',users.register);
 
     //verification
-    
+
 
     //User login
     //Generater JWT on successful login

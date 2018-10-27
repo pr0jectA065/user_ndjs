@@ -1,7 +1,15 @@
 var User=require('../../models/user.model');
+var Token=require('../../models/tokenreg.model')
 
 var jwt=require('jsonwebtoken');
 var bcrypt=require('bcryptjs');
+//var nodemailer=require('nodemailer');
+//var smtpTransport=require('nodemailer-smtp-transport');
+var Mailgun=require('mailgun-js');
+
+
+
+
 var config=require('../../config/config.js');
 
 var VerifyToken=require('../auth/token.verify');
@@ -22,32 +30,76 @@ exports.register=function(req,res){
         return res.status(400).send({message:"Password required for registration.."});
     }
     var hashPw=bcrypt.hashSync(req.body.pw,8);
+    console.log({message:hashPw});
 
     //Create an instance for registration
-    var reg_instance=new User({
+    var user=new User({
         firstname:req.body.firstname,
         lastname:req.body.lastname,
+        email:req.body.email,
         isVerified:req.body.isVerified,
         pw:hashPw
     });
+    console.log(user)
 
-    //return res.status(400).send({message:hashPw});
-
-    reg_instance.save(function(err,user_reg){
+    user.save(function(err){
         if (err){
-            console.log(err);
-            res.status(500).send("Error occured while registering the user..");
-        }else{
-            // create a token with epiry timeframe
-            var token = jwt.sign({id:user_reg._id},config.secret,{
-                expiresIn: 86400 // expires in 24 hours
-            });
-            
-            //expose the token to client just to capture it.
-            //store the token somewhere safe so it can be used to authenticate
-            //the user and authenticate subsequent operations
-            res.status(200).send({auth:true,token:token});
+            return res.status(500).send("Error occured while registering the user..");
         }
+        
+        // create a token with epiry timeframe
+        var jwToken=jwt.sign({id:user._id},config.secret,{
+            expiresIn:86400 //expires in 24 hours
+        });
+        
+        var token=new Token({
+            _userId:user._id,
+            token:jwToken,
+        });
+          
+        token.save(function(err){
+            if (err){
+                return res.status(500).send({msg:err.message});
+            }
+            
+            //Your api key, from Mailgun’s Control Panel
+            var api_key='cf636a83cbd281d875b7c130716df06d-4836d8f5-68417918';
+            //Your domain, from the Mailgun Control Panel
+            var domain='sandboxc389598d623b495cb4148c12be60a7d0.mailgun.org';
+            //Your sending email address
+            var from_who='pr0jecta065@gmail.com';
+
+            var mailgun=new Mailgun({apiKey:api_key,domain:domain});
+
+            var data={
+                //Specify email data
+                from:from_who,
+                //The email to contact
+                to:user.email,
+                //Subject and text data  
+                subject:'Hello from Mailgun',
+                html:'Hello, This is not a plain-text email, I wanted to test some spicy Mailgun sauce in NodeJS! <a href="http://0.0.0.0:3030/validate?' + req.params.mail + '">Click here to add your email address to a mailing list</a>'
+            }
+
+            //smtpTransporter.sendMail(mailOptions,function(err){
+            mailgun.messages().send(data,function(err,body){
+                if (err){
+                    console.log('smtpTransporter error:\n'+err.message);
+                    return;
+                    //return res.status(500).send({msg:err.message});
+                } else {
+                    //res.render('submitted',{email:user.email});
+                    console.log(body);
+                }
+            });
+            //res.status(200).send('A verification email has been sent to ' + user.email + '.');
+        });
+        
+        //expose the token to client just to capture it.
+        //store the token somewhere safe so it can be used to authenticate
+        //the user and authenticate subsequent operations
+        res.status(200).send({auth:true,token:jwToken});
+        //res.status(200).send({auth:true});
     });
 }
 
