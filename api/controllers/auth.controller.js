@@ -7,9 +7,6 @@ var bcrypt=require('bcryptjs');
 //var smtpTransport=require('nodemailer-smtp-transport');
 var Mailgun=require('mailgun-js');
 
-
-
-
 var config=require('../../config/config.js');
 
 var VerifyToken=require('../auth/token.verify');
@@ -17,10 +14,10 @@ var VerifyToken=require('../auth/token.verify');
 //Register/signup a new user account
 //Generate JWT on successful registration
 exports.register=function(req,res){
-    if (!req.body.firstname){
+    if (!req.body.fname){
         return res.status(400).send({message:"User first name required for registration.."});
     }
-    if (!req.body.lastname){
+    if (!req.body.lname){
         return res.status(400).send({message:"User last name required for registration.."});
     }
     if (!req.body.email){
@@ -34,9 +31,10 @@ exports.register=function(req,res){
 
     //Create an instance for registration
     var user=new User({
-        firstname:req.body.firstname,
-        lastname:req.body.lastname,
+        fname:req.body.fname,
+        lname:req.body.lname,
         email:req.body.email,
+        phone:req.body.phone,
         isVerified:req.body.isVerified,
         pw:hashPw
     });

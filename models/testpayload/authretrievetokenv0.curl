@@ -1,0 +1,1 @@
+curl -X GET -H "Content-Type:application/json" -H "x-access-token:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjViZjRmNjZiMTdiMzQ3OTg3NWZmZThhOSIsImlhdCI6MTU0Mjg0MzMzNSwiZXhwIjoxNTQyOTI5NzM1fQ.324YewtfUVp30Nsu84KiMQ3KfQfkWLMDr25CM66V1C8" http://localhost:3000/auth/me/v0

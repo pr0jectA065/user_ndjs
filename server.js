@@ -46,6 +46,9 @@ require('./api/routes/biz.routes.js')(app);
 //auth routes
 require('./api/routes/auth.routes.js')(app);
 
+//user profile routes
+require('./api/routes/userProf.routes.js')(app);
+
 //listen for requests
 var port=3000;
 app.listen(port,function(){

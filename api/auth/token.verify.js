@@ -11,11 +11,11 @@ function verifyToken(req,res,next) {
     jwt.verify(token,
         config.secret,
         function(err,decoded){
-        if (err)
-            return res.status(500).send({auth:false,message:'Failed to authenticate token.'});
+        if (err) return res.status(500).send({auth:false,message:'Failed to authenticate token.'});
+
         // if everything good, save to request for use in other routes
         req.userId=decoded.id;
-        //return res.status(200).send({userIdxx:req.userId});
+        //return res.status(200).send({VeriofyTokenUserId:req.userId});
 
         next();
     });
