@@ -3,3 +3,5 @@ package-lock.js
 package-lock.json
 .DS_Store
 .server.js.swp
+.history/
+.vscode/
