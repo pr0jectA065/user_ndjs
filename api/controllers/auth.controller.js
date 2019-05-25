@@ -5,11 +5,17 @@ var jwt=require('jsonwebtoken');
 var bcrypt=require('bcryptjs');
 //var nodemailer=require('nodemailer');
 //var smtpTransport=require('nodemailer-smtp-transport');
-var Mailgun=require('mailgun-js');
+
+var _=require('lodash');
 
 var config=require('../../config/config.js');
 
 var VerifyToken=require('../auth/token.verify');
+const {getToken}=require('../auth/token.verify');
+
+var SendEmail=require('../../email/sendEmail');
+
+var mailContent=require('../../config/mail.content')
 
 //Register/signup a new user account
 //Generate JWT on successful registration
@@ -36,19 +42,23 @@ exports.register=function(req,res){
         email:req.body.email,
         phone:req.body.phone,
         isVerified:req.body.isVerified,
-        pw:hashPw
+        userId:req.body.userId,
+        pw:hashPw,
+        audit:{appContext:req.body.appContext}
     });
+    console.log('-----------------------------------------------------------------------111')
     console.log(user)
 
+    console.log('-----------------------------------------------------------------------222')
+    console.log(user._id);
+    
     user.save(function(err){
         if (err){
             return res.status(500).send("Error occured while registering the user..");
         }
         
         // create a token with epiry timeframe
-        var jwToken=jwt.sign({id:user._id},config.secret,{
-            expiresIn:86400 //expires in 24 hours
-        });
+        var jwToken=getToken(user._id);
         
         var token=new Token({
             _userId:user._id,
@@ -59,37 +69,11 @@ exports.register=function(req,res){
             if (err){
                 return res.status(500).send({msg:err.message});
             }
+
+            //send REGISTRATION LINK in email
+            emailContent=mailContent.regEmailContent(user.userId);
+            SendEmail(user.email,emailContent);
             
-            //Your api key, from Mailgun’s Control Panel
-            var api_key='cf636a83cbd281d875b7c130716df06d-4836d8f5-68417918';
-            //Your domain, from the Mailgun Control Panel
-            var domain='sandboxc389598d623b495cb4148c12be60a7d0.mailgun.org';
-            //Your sending email address
-            var from_who='pr0jecta065@gmail.com';
-
-            var mailgun=new Mailgun({apiKey:api_key,domain:domain});
-
-            var data={
-                //Specify email data
-                from:from_who,
-                //The email to contact
-                to:user.email,
-                //Subject and text data  
-                subject:'Hello from Mailgun',
-                html:'Hello, This is not a plain-text email, I wanted to test some spicy Mailgun sauce in NodeJS! <a href="http://0.0.0.0:3030/validate?' + req.params.mail + '">Click here to add your email address to a mailing list</a>'
-            }
-
-            //smtpTransporter.sendMail(mailOptions,function(err){
-            mailgun.messages().send(data,function(err,body){
-                if (err){
-                    console.log('smtpTransporter error:\n'+err.message);
-                    return;
-                    //return res.status(500).send({msg:err.message});
-                } else {
-                    //res.render('submitted',{email:user.email});
-                    console.log(body);
-                }
-            });
             //res.status(200).send('A verification email has been sent to ' + user.email + '.');
         });
         
@@ -102,7 +86,7 @@ exports.register=function(req,res){
 }
 
 //User login
-//Generater JWT on successful login
+//Generate JWT on successful login
 exports.login=function(req,res){
     if (!req.body.email){
         return res.status(400).send({message:"Email required for login"});
@@ -116,19 +100,19 @@ exports.login=function(req,res){
         if (!user) return res.status(404).send({message:'User not found with email'});
     
         var passwordIsValid=bcrypt.compareSync(req.body.pw,user.pw);
-        if (!passwordIsValid) return res.status(401).send({auth:false,token:null});
+        if (!passwordIsValid) return res.status(401).send({userId:user.userId,auth:'Unauthorized',token:null});
 
-        //res.send(user); //send the user object on succeful login - just for test
-        //in production, on succeful login, we need to send the token, as follows..
-
-        var token = jwt.sign({id:user._id },config.secret,{
+        var token=jwt.sign({id:user._id},config.secret,{
             expiresIn:86400 //expires in 24 hours
         });
+
+        //res.status(200).send(user); //send the user object on succeful login - just for test purposes
+        //in production, on succeful login, we need to send the token, as follows..
 
         //expose the token to client just to capture it.
         //store the token somewhere safe so it can be used to authenticate
         //the user and authenticate subsequent operations
-        res.status(200).send({auth:true,token:token});
+        res.status(200).send({userId:user.userId,token:token});
     });
 }
 
@@ -191,4 +175,128 @@ exports.retrieveV1=function(req,res,next){
 
         res.status(200).send(user);
     });
+}
+
+//forgot userId
+//Retrieve userId with email 
+//send userid in email, to the emailId with which userId was retrieved
+exports.retrieveV2=function(req,res){
+    
+    User.findOne({email:req.body.email},function(err,user){
+        if (err){
+            console.log(err);
+            if (err.kind==='ObjectId'){
+                return res.status(404).send({message:"User not found with id "+req.body.email});
+            }
+            return res.status(500).send({message:"Error retrieving user with id "+req.body.email});
+        }
+        
+        if (!user) return res.status(404).send({message:'User not found with email '+req.body.email});
+        
+        //send userid in email, to the emailId with which userId was retrieved
+        emailContent=mailContent.forgotUserIdEmailContent(user.userId);
+        SendEmail(req.body.email,emailContent);
+
+        res.status(200).send({userId:user.userId});
+        }
+    );
+}
+
+//forgot password:
+//Check if user exists, using userId and/or email account
+//Once verified, send email with password reset link, which expires in 24 hours
+//email content: 1) generate token, 2) embed token in URL to reset password, 
+//Users clicks the link and resets the password
+//Use the registration module - update new password on the record
+
+exports.retrieveV3=function(req,res){
+
+    var appContext=req.header('appContext')
+    
+    User.findOne({userId:req.body.userId},function(err,user){
+        if (err){
+            console.log(err);
+            if (err.kind==='ObjectId'){
+                return res.status(404).send({message:"User not found with id "+req.body.userId});
+            }
+            return res.status(500).send({message:"Error retrieving user with id "+req.body.userId});
+        }
+        
+        if (!user) return res.status(404).send({message:'User not found with email '+req.body.userId});
+
+        vid=user._id;
+        emailId=req.body.email;
+
+        console.log({userObjectId:vid});
+
+        var token=VerifyToken.getToken(vid);
+        //console.log({token:token});
+
+        //send RESET PASSWORD LINK in email, to the emailId for the userId
+        //appContext - depending on which app is this called from,
+        //either testli or knocknock
+        emailContent=mailContent.forgotPwdEmailContent(req.body.userId,token,appContext);
+        SendEmail(emailId,emailContent);
+
+        res.status(200).send({userId:user.userId});
+        }
+    );
+
+    console.log('done with retrieveV3');
+}
+
+exports.resetpw=(req,res)=>{
+
+    var email=req.body.email
+
+    console.log(email)
+    console.log(req.body.pw)
+
+    User.findOneAndUpdate({email:req.body.email},
+        {$set:{pw:req.body.pw}
+    },{new:true})
+    .then(user=>{
+        if (!user){
+            return res.status(400).send({
+                message:'user not found with email: '+req.body.email
+            })
+        }
+        res.send(user)
+    }).catch(err=>{
+        if (err.kind==='ObjectId'){
+            return res.status(404).send({
+                message:"User not found with email "+req.body.email+" "+err
+            })
+        }
+        return res.status(500).send({
+            message:"Error updating password "
+        })
+    })
+}
+
+exports.resetpwv1=(req,res)=>{
+
+    var email=req.body.email
+
+    console.log(email)
+    console.log(req.body.pw)
+
+    User.findOne({email:req.body.email})
+    .then(user=>{
+        if (!user){
+            return res.status(400).send({
+                message:"User not found for the email: "+req.body.email
+            })
+        }
+        res.send(user)
+    }).catch(err=>{
+        if (err.kind==='ObjectId'){
+            return res.status(404).send({
+                message:"User not found with email "+req.body.email+" "+err
+            })
+        }
+        return res.status(500).send({
+            message:"Error retrieving user for email: "+req.body.email
+        })
+    })
 }

@@ -13,26 +13,6 @@ exports.findAll=function(req,res){
     })
 };
 
-//Retrieve single user profile with user Id
-exports.findOne=function(req,res){
-
-    User.findById(req.params.userId,function(err,user){
-        if (err){
-            console.log(err);
-            if (err.kind==='ObjectId'){
-                return res.status(404).send({message:"User not found with id "+req.params.userId});
-            }
-            return res.status(500).send({message:"Error retrieving user with id "+req.params.userId});
-        }
-
-        if (!user){
-            return res.status(404).send({message:"User not found with id "+req.params.userId});
-        }
-
-        res.send(user);
-    });
-}
-
 // Update a user identified by the user Id in the request
 exports.update=function(req,res){
     User.findById(req.params.userId,function(err,user){

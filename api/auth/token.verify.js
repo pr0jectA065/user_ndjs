@@ -6,7 +6,7 @@ function verifyToken(req,res,next) {
     //return res.status(200).send({token:token,secret:config.secret});
 
     if (!token)
-        return res.status(403).send({auth:false,message:'No token provided.'});
+        return res.status(403).send({auth:false,message:'No token provided..'});
         
     jwt.verify(token,
         config.secret,
@@ -21,4 +21,19 @@ function verifyToken(req,res,next) {
     });
 }
 
-module.exports=verifyToken;
+//function getToken(req,res,next){
+const getToken=(id)=>{
+
+    // create a token with epiry timeframe
+    var jwToken=jwt.sign({id:id},config.secret,{
+        expiresIn:86400 //expires in 24 hours
+    });
+
+    if (!jwToken)
+        return res.status(403).send({auth:false,message:'No token generated..'});
+
+    return jwToken;
+    //next()
+}
+
+module.exports={verifyToken,getToken};

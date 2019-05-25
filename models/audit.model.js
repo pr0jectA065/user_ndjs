@@ -7,7 +7,10 @@ var auditModel=new model({
     //In order to suppress _id, set it to false in the model, as follows
     _id:false,
     createdBy:{type:String,default:'System'},
-    updatedBy:{type:String,default:'System'}
+    updatedBy:{type:String,default:'System'},
+    //appContext = application context:
+    //testli, or knocknock
+    appContext:{type:String,default:''}
 },{
     timestamps:true
 });

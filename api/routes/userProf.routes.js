@@ -5,5 +5,5 @@ module.exports=function(app){
     var userProf=require('../controllers/userProf.controller.js');
 
     //Retrieve all user profiles
-    app.post('/usr/prof',VerifyToken,userProf.usrProf);
+    app.post('/usr/prof',VerifyToken.verifyToken,userProf.usrProf);
 }
