@@ -1,1 +1,5 @@
-node_modules/
+#ignore node modules
+[Nn]ode_modules/
+
+#ignore mailgun config
+config/mail.provider.mailgun.js
