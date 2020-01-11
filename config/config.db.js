@@ -1,7 +1,6 @@
 var dbConfig = {
     development: {
-        url: 'mongodb://3.135.62.9:27017/pr0jectA',
-        hostname: '3.135.62.9',
+        hostname: process.env.IP,
         port: '27017',
         database: 'pr0jectA',
         username: 'testli',
