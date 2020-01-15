@@ -9,7 +9,9 @@ const cors = require('cors');
 
 //parse requests of content-type - application/x-www-form-urlencoded
 var bodyParser = require('body-parser');
-app.use(bodyParser.urlencoded({ "extended": true }));
+app.use(bodyParser.urlencoded({
+    "extended": true
+}));
 
 //parse requests of content-type - application/json
 app.use(bodyParser.json());
@@ -23,7 +25,14 @@ app.options('*', cors());
 
 //mongoose setup to connect to mongodb
 mongoose.Promise = global.Promise;
+mongoose.set('useNewUrlParser', true);
+mongoose.set('useUnifiedTopology', true);
+mongoose.set('useFindAndModify', false);
+mongoose.set('useCreateIndex', true);
+
+console.log(app.settings.env)
 if (app.settings.env === "development") {
+    console.log(dbConfig.getDbPath(app.settings.env))
     mongoose.connect(dbConfig.getDbPath(app.settings.env))
 }
 //mongoose.connect(dbConfig.url);
@@ -39,7 +48,9 @@ mongoose.connection.once('open', function () {
 
 //define a simple route
 app.get('/', function (req, res) {
-    res.json({ "message": "User profile management" });
+    res.json({
+        "message": "User profile management"
+    });
 });
 
 //profile routes
