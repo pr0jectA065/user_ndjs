@@ -3,14 +3,14 @@ var dbConfig = {
         hostname: process.env.IP,
         port: '27017',
         database: 'pr0jectA',
-        username: 'testli',
-        password: 'testli2020!'
+        username: '',
+        password: ''
 
     },
     getDbPath: function (env) {
         switch (env) {
             case 'development':
-                return 'mongodb://' + dbConfig.development.username + ":" + dbConfig.development.password + "@" + dbConfig.development.hostname + ":" + dbConfig.development.port + "/" + dbConfig.development.database;
+                return 'mongodb://' + dbConfig.development.hostname + ":" + dbConfig.development.port + "/" + dbConfig.development.database;
             case 'dev':
                 return 'mongodb://' + dbConfig.development.username + ":" + dbConfig.development.password + "@" + dbConfig.development.hostname + ":" + dbConfig.development.port + "/" + dbConfig.development.database;
         }

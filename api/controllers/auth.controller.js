@@ -13,7 +13,9 @@ var VerifyToken=require('../auth/token.verify');
 
 //Register/signup a new user account
 //Generate JWT on successful registration
-exports.register=function(req,res){
+exports.register = function (req, res) {
+    
+    
     if (!req.body.fname){
         return res.status(400).send({message:"User first name required for registration.."});
     }
