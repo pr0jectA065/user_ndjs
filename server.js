@@ -2,6 +2,9 @@
 var dbConfig = require('./config/config.db.js');
 var mongoose = require('mongoose');
 
+var config = require('./config/config').get(process.env.NODE_ENV);
+// console.log(config);
+
 //create express app
 var express = require('express');
 var app = express();
@@ -30,7 +33,9 @@ mongoose.set('useUnifiedTopology', true);
 mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
 
-console.log(app.settings.env)
+// console.log(app.settings.env)
+// console.log(config)
+
 if (app.settings.env === "development") {
     console.log(dbConfig.getDbPath(app.settings.env))
     mongoose.connect(dbConfig.getDbPath(app.settings.env))

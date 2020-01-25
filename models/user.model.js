@@ -19,14 +19,13 @@ var userModel = new model({
         String,
         default: ''
     },
+    //User Type can be parent/individual user/Corporate / Instructor
     userType: {
         String,
         default: ''
     },
     //contact
     email: String,
-    phone: String,
-
     //flag to indicate whether registration is verified or not
     isVerified: {
         type: Boolean,
@@ -54,14 +53,10 @@ var userModel = new model({
     tags: [{
         type: String
     }],
-    status: Number,
-
     status: {
         type: Number,
         default: 0
     },
-
-
     //to always include auditing, set default:auditModel
     audit: {
         type: auditModel,
